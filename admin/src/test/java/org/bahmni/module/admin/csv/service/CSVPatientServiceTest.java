@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.openmrs.Concept;
@@ -19,9 +20,13 @@ import org.openmrs.api.ConceptNameType;
 import org.openmrs.api.ConceptService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.PersonService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.addresshierarchy.AddressField;
 import org.openmrs.module.addresshierarchy.AddressHierarchyLevel;
 import org.openmrs.module.addresshierarchy.service.AddressHierarchyService;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,10 +39,13 @@ import java.util.Set;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Context.class})
 public class CSVPatientServiceTest {
 
     @Rule
@@ -58,6 +66,9 @@ public class CSVPatientServiceTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        PowerMockito.mockStatic(Context.class);
+        when(Context.getAdministrationService()).thenReturn(mockAdminService);
+        when(mockAdminService.getGlobalProperty(eq("bahmni.admin.csv.upload.dateFormat"))).thenReturn("yyyy-M-d");
     }
 
     @Test
