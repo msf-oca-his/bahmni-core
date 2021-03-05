@@ -75,14 +75,14 @@ public class RelationshipPersisterTest {
     @Test
     public void shouldThrowExceptionIfTheStartDateFormatIsWrong() throws Exception {
         expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Could not parse provided dates. Please provide date in format yyyy-mm-dd");
+        expectedEx.expectMessage("Date format 02-01-2015 doesn't match `bahmni.admin.csv.upload.dateFormat` global property, expected format yyyy-M-d");
         getRelationshipPersister().validateRow(new RelationshipRow("GAN200012", "GAN200015", "ProviderName", "Child", "02-01-2015", "2014-01-01"));
     }
 
     @Test
     public void shouldThrowExceptionIfTheEndDateFormatIsWrong() throws Exception {
         expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Could not parse provided dates. Please provide date in format yyyy-mm-dd");
+        expectedEx.expectMessage("Date format 01-01-2014 doesn't match `bahmni.admin.csv.upload.dateFormat` global property, expected format yyyy-M-d");
         getRelationshipPersister().validateRow(new RelationshipRow("GAN200012", "GAN200015", "ProviderName", "Child", "2015-02-01", "01-01-2014"));
     }
 
