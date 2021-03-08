@@ -2,6 +2,7 @@ package org.bahmni.module.admin.observation.handler;
 
 import org.bahmni.csv.KeyValue;
 import org.bahmni.module.admin.csv.models.EncounterRow;
+import org.bahmni.module.admin.csv.service.FormFieldPathGeneratorService;
 import org.bahmni.module.admin.observation.CSVObservationHelper;
 import org.bahmni.form2.service.FormFieldPathService;
 import org.junit.Before;
@@ -39,12 +40,14 @@ public class Form2CSVObsHandlerTest {
     private Form2CSVObsHandler form2CSVObsHandler;
     private CSVObservationHelper csvObservationHelper;
     private FormFieldPathService formFieldPathService;
+    private FormFieldPathGeneratorService formFieldPathGeneratorService;
 
     @Before
     public void setUp() {
         initMocks(this);
         csvObservationHelper = mock(CSVObservationHelper.class);
         formFieldPathService = mock(FormFieldPathService.class);
+        formFieldPathGeneratorService = mock(FormFieldPathGeneratorService.class);
     }
 
     @Test
@@ -58,7 +61,7 @@ public class Form2CSVObsHandlerTest {
         when(csvObservationHelper.isForm2Type(form1CSVObservation)).thenReturn(false);
         when(csvObservationHelper.isForm2Type(form2CSVObservation)).thenReturn(true);
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, null);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, null, null);
 
         final List<KeyValue> form2CSVObs = form2CSVObsHandler.getRelatedCSVObs(encounterRow);
 
@@ -87,7 +90,7 @@ public class Form2CSVObsHandlerTest {
                 any(Date.class), any(KeyValue.class), anyListOf(String.class));
         when(formFieldPathService.getFormFieldPath(asList("Vitals", "Height"))).thenReturn("Vitals.1/1-0");
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         form2CSVObsHandler.handle(encounterRow);
 
@@ -111,7 +114,7 @@ public class Form2CSVObsHandlerTest {
         when(csvObservationHelper.isForm2Type(form1CSVObservation)).thenReturn(false);
         when(csvObservationHelper.isForm2Type(form2CSVObservation)).thenReturn(true);
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         form2CSVObsHandler.handle(encounterRow);
 
@@ -132,7 +135,7 @@ public class Form2CSVObsHandlerTest {
         final List<String> headerParts = new ArrayList<>(Arrays.asList("form2", "Vitals"));
         when(csvObservationHelper.getCSVHeaderParts(form2CSVObservation)).thenReturn(headerParts);
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         expectedException.expect(APIException.class);
         expectedException.expectMessage(format("No concepts found in %s", form2CSVObservation.getKey()));
@@ -158,8 +161,9 @@ public class Form2CSVObsHandlerTest {
         doNothing().when(csvObservationHelper).createObservations(anyListOf(EncounterTransaction.Observation.class),
                 any(Date.class), anyListOf(KeyValue.class), anyListOf(String.class));
         when(formFieldPathService.isMultiSelectObs(asList("HIV_History", "PresentConditions"))).thenReturn(true);
+        when(formFieldPathService.isValidCSVHeader(asList("HIV_History", "PresentConditions"))).thenReturn(true);
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         form2CSVObsHandler.handle(encounterRow, true);
         verify(csvObservationHelper).isForm2Type(form2CSVObservation);
@@ -187,8 +191,9 @@ public class Form2CSVObsHandlerTest {
         doNothing().when(csvObservationHelper).createObservations(anyListOf(EncounterTransaction.Observation.class),
                 any(Date.class), anyListOf(KeyValue.class), anyListOf(String.class));
         when(formFieldPathService.isAddmore(asList("TB", "Method of confirmation"))).thenReturn(true);
+        when(formFieldPathService.isValidCSVHeader(asList("TB", "Method of confirmation"))).thenReturn(true);
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         form2CSVObsHandler.handle(encounterRow, true);
         verify(csvObservationHelper).isForm2Type(form2CSVObservation);
@@ -209,8 +214,9 @@ public class Form2CSVObsHandlerTest {
         final List<String> headerParts = new ArrayList<>(Arrays.asList("form2", "Vitals"));
         when(csvObservationHelper.getCSVHeaderParts(form2CSVObservation)).thenReturn(headerParts);
         when(formFieldPathService.isMandatory(asList("Vitals"))).thenReturn(true);
+        when(formFieldPathService.isValidCSVHeader(asList("Vitals"))).thenReturn(true);
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         expectedException.expect(APIException.class);
         expectedException.expectMessage("Empty value provided for mandatory field Vitals");
@@ -235,15 +241,49 @@ public class Form2CSVObsHandlerTest {
         final List<String> headerParts = new ArrayList<>(Arrays.asList("form2", "TB", "Past Visit Date"));
         when(csvObservationHelper.getCSVHeaderParts(form2CSVObservation)).thenReturn(headerParts);
         when(formFieldPathService.isAllowFutureDates(asList("TB", "Past Visit Date"))).thenReturn(false);
+        when(formFieldPathService.isValidCSVHeader(asList("TB", "Past Visit Date"))).thenReturn(true);
 
         PowerMockito.mockStatic(CSVObservationHelper.class);
         when(csvObservationHelper.getLastItem(anyListOf(EncounterTransaction.Observation.class))).thenReturn(observation);
         when(csvObservationHelper.getLastItem(eq(asList("TB", "Past Visit Date")))).thenReturn("Past Visit Date");
 
-        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService);
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
 
         expectedException.expect(APIException.class);
         expectedException.expectMessage("Future date [2099-12-31] is not allowed for [Past Visit Date]");
+
+        form2CSVObsHandler.handle(encounterRow, true );
+
+        verify(csvObservationHelper).createObservations(anyListOf(EncounterTransaction.Observation.class),
+                any(Date.class), any(KeyValue.class), anyListOf(String.class));
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionIfCSVHeaderIsInvalid() throws ParseException {
+        EncounterTransaction.Observation observation = new EncounterTransaction.Observation();
+        observation.setUuid("UUID");
+        observation.setConcept(new EncounterTransaction.Concept());
+        observation.setValue("2099-12-31");
+        observation.getConcept().setDataType("Date");
+
+        final KeyValue form2CSVObservation = new KeyValue("form2.TB.Past Visit Date", "2099-12-31");
+        final EncounterRow encounterRow = new EncounterRow();
+        encounterRow.obsRows = singletonList(form2CSVObservation);
+        encounterRow.encounterDateTime = "2019-11-11";
+
+        when(csvObservationHelper.isForm2Type(form2CSVObservation)).thenReturn(true);
+        final List<String> headerParts = new ArrayList<>(Arrays.asList("form2", "TB", "Past Visit Date"));
+        when(csvObservationHelper.getCSVHeaderParts(form2CSVObservation)).thenReturn(headerParts);
+        when(formFieldPathService.isValidCSVHeader(asList("TB", "Past Visit Date"))).thenReturn(false);
+
+        PowerMockito.mockStatic(CSVObservationHelper.class);
+        when(csvObservationHelper.getLastItem(anyListOf(EncounterTransaction.Observation.class))).thenReturn(observation);
+        when(csvObservationHelper.getLastItem(eq(asList("TB", "Past Visit Date")))).thenReturn("Past Visit Date");
+
+        form2CSVObsHandler = new Form2CSVObsHandler(csvObservationHelper, formFieldPathService, formFieldPathGeneratorService);
+
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("No concepts found in form2.TB.Past Visit Date");
 
         form2CSVObsHandler.handle(encounterRow, true );
 
