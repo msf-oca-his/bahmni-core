@@ -182,13 +182,6 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>org.bahmni.module</groupId>
-                <artifactId>bahmni-migrator</artifactId>
-                <version>${bahmniJavaUtilsVersion}</version>
-                <type>jar</type>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.openmrs.module</groupId>
                 <artifactId>webservices.rest-omod-common</artifactId>
                 <version>${openMRSWebServicesVersion}</version>
