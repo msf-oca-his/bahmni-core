@@ -35,6 +35,6 @@ jobs:
           aws-region: ${{ secrets.BAHMNI_LITE_AWS_REGION }}
       - name: upload omod
         run: |
-          aws s3 cp bahmnicore-omod/target/${{env.OMOD_NAME}}.omod s3://bahmni-artefacts/${{github.event.repository.name}}/build/${{env.OMOD_NAME}}-$GITHUB_RUN_NUMBER.omod --region ${{ secrets.BAHMNI_LITE_AWS_REGION }} --acl public-read
+          aws s3 cp bahmnicore-omod/target/${{env.OMOD_NAME}}.omod s3://bahmni-artifacts/${{github.event.repository.name}}/build/${{env.OMOD_NAME}}-$GITHUB_RUN_NUMBER.omod --region ${{ secrets.BAHMNI_LITE_AWS_REGION }} --acl public-read
           aws s3 rm s3://bahmni-artefacts/${{github.event.repository.name}}/latest/ --region eu-central-1 --recursive
-          aws s3 cp bahmnicore-omod/target/${{env.OMOD_NAME}}.omod s3://bahmni-artefacts/${{github.event.repository.name}}/latest/${{env.OMOD_NAME}}-$GITHUB_RUN_NUMBER.omod --region ${{ secrets.BAHMNI_LITE_AWS_REGION }} --acl public-read
+          aws s3 cp bahmnicore-omod/target/${{env.OMOD_NAME}}.omod s3://bahmni-artifacts/${{github.event.repository.name}}/latest/${{env.OMOD_NAME}}-$GITHUB_RUN_NUMBER.omod --region ${{ secrets.BAHMNI_LITE_AWS_REGION }} --acl public-read
