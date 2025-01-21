@@ -35,5 +35,5 @@ jobs:
           aws-region: ${{ secrets.BAHMNI_LITE_AWS_REGION }}
       - name: upload omod
         run: |
-          aws s3 cp bahmnicore-omod/target/${{env.OMOD_NAME}}.omod s3://bahmni-artifacts/bahmni-lite/release-1.0.2/${{github.event.repository.name}}/${{env.OMOD_NAME}}-1.0.0.omod --region ${{ secrets.BAHMNI_LITE_AWS_REGION }} --acl public-read
+          aws s3 cp bahmnicore-omod/target/${{env.OMOD_NAME}}.omod s3://bahmni-artifacts/bahmni-lite/release-1.0.2/${{github.event.repository.name}}/${{env.OMOD_NAME}}.omod --region ${{ secrets.BAHMNI_LITE_AWS_REGION }} --acl public-read
   
